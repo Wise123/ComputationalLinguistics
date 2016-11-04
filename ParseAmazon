@@ -1,0 +1,30 @@
+import requests, time
+from bs4 import BeautifulSoup
+from pprint import pprint
+
+headers = {'User-agent': 'Mozilla/5.0'}
+url = 'https://www.amazon.com/Monitors-Computers-Accessories/b/?node=1292115011'
+
+r = requests.get(url, headers=headers)
+soup = BeautifulSoup(r.text, 'lxml')
+
+product_links = (tag.get('href') for tag in soup.select('.s-result-item .s-access-detail-page'))
+
+def get_product_info(url):
+    data = dict()
+    r = requests.get(url, headers=headers)
+    soup = BeautifulSoup(r.text, 'lxml')
+    data['link'] = soup.find(rel='canonical').get('href')
+    data['name'] = soup.find('h1').text.strip()
+    data['price'] = soup.find(id='priceblock_ourprice').text if soup.find(id='priceblock_ourprice') else None
+    data['img_main'] = soup.find(id='landingImage').get('data-old-hires')
+
+    return data
+
+products_data = []
+for link in product_links:
+    print('Parse ' + link)
+    products_data.append(get_product_info(link))
+    time.sleep(1)
+
+pprint(products_data)
