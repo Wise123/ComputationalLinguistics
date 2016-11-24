@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 import urllib
 import urllib.request
+import io
+import json
 
 
 # функция для получения супа страницы по url
@@ -31,14 +33,14 @@ for i in range(len(prices)):
                             'shortDescription': shortDescriptions[i].get_text(),
                             'link': links[i]['href']
                        })
-
+'''
 for i in outputData:
     print(i['price'])
     print(i['name'])
     print(i['shortDescription'])
     print(i['link'])
     print('')
-'''
+
 структура данных:
 [
     {
@@ -49,3 +51,6 @@ for i in outputData:
     }
 ]
 '''
+
+with open('dataJson.txt', 'w', encoding='utf-8') as f:
+  f.write(json.dumps(outputData, indent=4))
