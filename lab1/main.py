@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 import urllib
 import urllib.request
-import io
 import json
 
 
@@ -26,13 +25,19 @@ i = 0
 
 outputData = []
 
+fullDescription = []
+
+#print(len(prices))
+
 for i in range(len(prices)):
     outputData.append({
-                            'price': prices[i].get_text(),
-                            'name': names[i].get_text(),
-                            'shortDescription': shortDescriptions[i].get_text(),
-                            'link': links[i]['href']
-                       })
+        'price': prices[i].get_text(),
+        'name': names[i].get_text(),
+        'shortDescription': shortDescriptions[i].get_text(),
+        'link': links[i]['href']
+    })
+
+
 '''
 for i in outputData:
     print(i['price'])
@@ -52,5 +57,28 @@ for i in outputData:
 ]
 '''
 
+
+print(len(outputData))
+
+for i in range(len(outputData)):
+    charLink = dnsHomeUrl + outputData[i]['link'] + "characteristics/"
+    print(charLink)
+    childPage = getSoupByUrl(charLink)
+    charTableElem = childPage.find_all('table', class_="table-params table-no-bordered")[0]  # получение таблицы с характеристиками
+    specif = childPage.find_all('div', class_="price_item_description")
+    for x in charTableElem.find_all('tr'):  # идем по строкам
+        if (len(x.find_all('td')) == 1):  # если в строке только 1 td
+            ex = x.find_all('td')[0].text
+            ex2 = ""
+        else:
+            ex = x.find_all('td')[0].find_all('a')[0].text
+            ex2 = x.find_all('td')[1].text
+
+        strForJson = "\"" + ex + "\":\"" + ex2 + "\""
+        fullDescription.append(strForJson)
+
+    print(fullDescription)
+    # outputData.append({'fullDescription': fullDescription[i]})
+
 with open('dataJson.txt', 'w', encoding='utf-8') as f:
-  f.write(json.dumps(outputData, indent=4))
+  f.write(json.dumps(outputData, indent=4, ensure_ascii=False))
